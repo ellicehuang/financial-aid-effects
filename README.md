@@ -5,7 +5,8 @@ higher education first-time, full-time (FTFT) enrollment at public, two-year ins
 using data from the IPEDS database in a differences-in-differences (DiD) regression model.
 
 While the regression model provides inconclusive results (statistically insignificant coefficient of interest), 
-this project includes discussion on the model's shortcomings and potential alternative models to parse the casual effect.
+this project includes discussion on the model's shortcomings and potential alternative models to parse the casual effect,
+and other potential routes of analysis.
 
 Files include:
 
