@@ -11,7 +11,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## Question 1
+## Summary Statistics
 Table 1 shows summary statistics containing the number of BA schools (`total_bach`), number of public schools (`total_public`), mean total FTFT undergraduates (`mean_FTFT`), mean total FTFT state/local aid (`mean_grant_state`), and mean FTFT total federal aid (`mean_grant_federal`) by year.
 
 ```{r, results='asis', echo=F}
@@ -30,7 +30,7 @@ summary_table <- clean |>
 stargazer(summary_table, summary=F, header = F, title="Summary Statistics")
 ```
 
-## Question 2
+## Visualization and Parallel Trends Analysis
 The graphs below compare average state/local grant aid (Figure 1) and average FTFT enrollment (Figure 2) across the four institution types between 2010 and 2015.
 
 Figure 1 shows that after the intervention occurred between 2014 and 2015, public two-year institutions appear to receive significantly more aid, while public four-year institutions receive less. Additionally, public institutions trend similarly before the intervention, and diverge in 2015. Private aid trends the same. 
@@ -68,7 +68,7 @@ ggplot(grouped, aes(x = year, y = mean_enrollment, color = group)) +
     theme_light()
 ```
 
-## Question 3
+## Regression Analysis
 I use a differences-in-differences model to estimate the causal effect of the Tennessee Promise program on enrollment at public, two-year institutions. I estimate the following equation:
 $$enroll{i,t} = \alpha + \beta_1treat_{i,t} + \beta_2post_{i,t} + \beta_3post_{i,t} \times treat_{i,t} +\epsilon_{i,t}$$
 where *enroll* is the FTFT enrollment for institution *i* at year *t*; *treat* is an indicator that is 1 if institution *i* is public, two-year; *post* is an indicator that is 1 if time *t* is after the intervention; and *post $\times$ treat* is an indicator that is 1 if time *t* is after the intervention and institution *i* is public, two-year.
@@ -111,11 +111,11 @@ ggplot(b) +
 ```
 
 
-## Question 4
+## Discussion
 
-To test the effectiveness of no-cost tuition on college outcomes, I would perform a randomized control trial. The treatment group would include students who are offered no-cost tuition, and the control group would include students with access to status quo financial aid programs. Students would be randomly assigned to minimize bias and pre-existing conditions.
+To further test the effectiveness of no-cost tuition on college outcomes, I would perform a randomized control trial. The treatment group would include students who are offered no-cost tuition, and the control group would include students with access to status quo financial aid programs. Students would be randomly assigned to minimize bias and pre-existing conditions.
 
-An alternative to an RCT (to save time and money) would be to perform another differences-in-differences study, using a demographically similar state as the control group. A neighboring state (Georgia or North Carolina, for example) with similar financial aid, university structures, and school rankings would be a good candidate. Then, the control group would be public-two year institutions in Georgia, and the treatment group would be public-two year institutions in Tennessee.
+An alternative to an RCT (to save time and money) would be to perform a different differences-in-differences study using a demographically similar state as the control group. A neighboring state (Georgia or North Carolina, for example) with similar financial aid, university structures, and school rankings would be a good candidate. Then, the control group would be public-two year institutions in Georgia, and the treatment group would be public-two year institutions in Tennessee.
 
 Aside from enrollment, other outcomes to measure could include retention rates after the first year, graduation rates, time to degree completion, debt levels, salary outcomes, and employment outcomes.
 
