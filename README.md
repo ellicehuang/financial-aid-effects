@@ -1,10 +1,4 @@
----
-output:
-  pdf_document: default
-  html_document: default
-  word_document: default
----
-# 2024 MIT Blueprint Labs Data Task - Ellice Huang
+# financial-aid-outcomes
 
 This project estimates the causal effect of the Tennessee Promise program on higher education first-time, full-time 
 (FTFT) enrollment at public, two-year institutions from 2010 to 2015 using data from the IPEDS database in a 
