@@ -1,4 +1,4 @@
-# financial-aid-outcomes
+# financial-aid-effects
 
 This project estimates the causal effect of the Tennessee Promise, a no-cost financial aid program, on 
 higher education first-time, full-time (FTFT) enrollment at public, two-year institutions from 2010 to 2015 
