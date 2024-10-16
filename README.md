@@ -9,10 +9,9 @@ this project includes discussion on the model's shortcomings and potential alter
 
 Files include:
 
-- `2024 MIT Blueprint Labs Data Task.pdf`: data task instructions
-- `schools`: (raw data) folder of .csv files including US higher education institution data from 2010-2015
-- `students`: (raw data) folder of .csv file including US higher education student enrollment data from 2010-2015
-- `xwalk`: (raw data) folder of .csv file converting zip codes to state abbreviations
+- `data/schools`: (raw data) folder of .csv files including US higher education institution data from 2010-2015
+- `data/students`: (raw data) folder of .csv file including US higher education student enrollment data from 2010-2015
+- `data/xwalk`: (raw data) folder of .csv file converting zip codes to state abbreviations
 - `codebooks`: codebooks for `schools` and `students` folders, providing code rules and variable descriptions
 - `clean.csv`: cleaned raw data, including data on schools in TN containing the institution ID, BA-offered indicator,
 public institution indicator, FTFT enrollment numbers, FTFT state/local grant amounts, and FTFT federal grant amounts.
