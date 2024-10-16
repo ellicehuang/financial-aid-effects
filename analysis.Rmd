@@ -1,0 +1,132 @@
+---
+title: 'Part B: Analysis'
+author: "Ellice Huang"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stargazer)
+library(dplyr)
+library(ggplot2)
+```
+
+## Question 1
+Table 1 shows summary statistics containing the number of BA schools (`total_bach`), number of public schools (`total_public`), mean total FTFT undergraduates (`mean_FTFT`), mean total FTFT state/local aid (`mean_grant_state`), and mean FTFT total federal aid (`mean_grant_federal`) by year.
+
+```{r, results='asis', echo=F}
+clean <- read.csv("clean.csv")
+
+summary_table <- clean |>
+  group_by(year) |>
+  summarize(
+    total_bach = sum(degree_bach),
+    total_public = sum(public),
+    mean_FTFT = round(mean(enroll_ftug)),
+    mean_grant_state = round(mean(grant_state)),
+    mean_grant_federal = round(mean(grant_federal))
+  )
+
+stargazer(summary_table, summary=F, header = F, title="Summary Statistics")
+```
+
+## Question 2
+The graphs below compare average state/local grant aid (Figure 1) and average FTFT enrollment (Figure 2) across the four institution types between 2010 and 2015.
+
+Figure 1 shows that after the intervention occurred between 2014 and 2015, public two-year institutions appear to receive significantly more aid, while public four-year institutions receive less. Additionally, public institutions trend similarly before the intervention, and diverge in 2015. Private aid trends the same. 
+
+&nbsp;
+
+```{r, echo=F, fig.height = 2, warning=F, message=F}
+# create groups
+clean <- clean |>
+  mutate(group = case_when(
+    public == 1 & degree_bach == 0 ~ "public_twoyear",
+    public == 1 & degree_bach == 1 ~ "public_fouryear",
+    public == 0 & degree_bach == 0 ~ "private_twoyear",
+    public == 0 & degree_bach == 1 ~ "private_fouryear"
+  ))
+
+# group by year and institution group for visualization
+grouped <- clean |>
+  group_by(year, group) |>
+  summarise(
+    mean_state_grant = mean(grant_state, na.rm = T),
+    mean_enrollment = mean(enroll_ftug, na.rm = T)
+  )
+
+ggplot(grouped, aes(x = year, y = mean_state_grant, color = group)) +
+    geom_line() +
+    labs(title = "Figure 1. Average State + Local Grant Aid by Institution Type, 2010-2015",
+         x = "Year", y = "Mean Grant Aid ($)")+
+    theme_light()
+
+ggplot(grouped, aes(x = year, y = mean_enrollment, color = group)) +
+    geom_line() +
+    labs(title = "Figure 2. Average FTFT Enrollment by Institution Type, 2010-2015",
+       x = "Year", y = "Mean Enrollment (FTFT)") +
+    theme_light()
+```
+
+## Question 3
+I use a differences-in-differences model to estimate the causal effect of the Tennessee Promise program on enrollment at public, two-year institutions. I estimate the following equation:
+$$enroll{i,t} = \alpha + \beta_1treat_{i,t} + \beta_2post_{i,t} + \beta_3post_{i,t} \times treat_{i,t} +\epsilon_{i,t}$$
+where *enroll* is the FTFT enrollment for institution *i* at year *t*; *treat* is an indicator that is 1 if institution *i* is public, two-year; *post* is an indicator that is 1 if time *t* is after the intervention; and *post $\times$ treat* is an indicator that is 1 if time *t* is after the intervention and institution *i* is public, two-year.
+
+The cutoff point, or intervention date, for my *post* variable is 2015 (inclusive). The control group is all institutions that are not public two-year. $\beta_3$ is my coefficient of interest, which estimates the causal effect of the Tennessee Promise program on FTFT enrollment.
+
+The results in Table 2 indicate that while the Tennessee Promise may have led to an increase in enrollment at public, two-year colleges by about 174 students, the effect is not statistically significant (p > 0.05). Thus, the regression results are inconclusive and require more data and analysis to interpret the casual effect.
+
+However, the results indicate that on average, public, two-year institutions have statistically significantly (p<0.001) higher enrollment than other institutions, by about 268 students.
+
+```{r, results='asis', echo=F, warning=F}
+# use a differences in differences model
+clean$post <- ifelse(clean$year>=2015,1,0)
+clean$treat <- ifelse(clean$group=="public_twoyear",1,0)
+
+reg1 <- glm(enroll_ftug ~treat*post,data=clean)
+stargazer(reg1, header = F, report=("vcsp"), title="Regression results")
+```
+
+The assumptions for this model include:
+
+1. Parallel trends: DiD assumes that in the absence of the Tennessee Promise program, the enrollment trends for public two-year colleges and the control group would have been parallel. Looking at Figure 2, this appears to be true--before 2015, the institution enrollment trends were parallel, and diverged in 2015.
+2. Lack of anticipation effects: the model assumes there were no behavior changes in anticipation of the Tennessee Promise.
+3. Confounding factors: the model assumes no other confounding factors, such as policy changes, affected enrollment in the sample period.
+
+Looking at Figure 2, the parallel trends assumption appears to be true--before 2015, the institution enrollment trends were parallel, and diverged in 2015. Figure 3 explores this trend more specifically, showing parallel treatment and control trends. However, I have reservations about this model because we cannot assume that there were no anticipation effects or other confounding factors. For example, students may have taken gap years to take advantage of the program, or a change in school rankings may have confounded the results. 
+
+To improve my model, I would control for other confounding factors like income level and ethnic background. In addition, a DiD study might be more effective in comparing public, two-year schools in Tennessee with those in another demographically similar state that did not have a similar financial aid program in the time period.
+
+```{r, fig.height = 2, echo=F, warning=F}
+clean$treat <- factor(ifelse(clean$group=="public_twoyear",1,0))
+
+b <- aggregate(clean, by=list(clean$treat,clean$year), FUN=mean)
+ggplot(b) +
+  geom_line(aes(x=Group.2, y=enroll_ftug, group=Group.1, color=Group.1)) +
+  ggtitle("Figure 3: Parallel trends analysis, treatment vs. control") +
+  theme_light() +
+  labs(x="Year", y="Mean enrollment", color='group') +
+  scale_color_hue(labels = c("control", "treatment"))
+```
+
+
+## Question 4
+
+To test the effectiveness of no-cost tuition on college outcomes, I would perform a randomized control trial. The treatment group would include students who are offered no-cost tuition, and the control group would include students with access to status quo financial aid programs. Students would be randomly assigned to minimize bias and pre-existing conditions.
+
+An alternative to an RCT (to save time and money) would be to perform another differences-in-differences study, using a demographically similar state as the control group. A neighboring state (Georgia or North Carolina, for example) with similar financial aid, university structures, and school rankings would be a good candidate. Then, the control group would be public-two year institutions in Georgia, and the treatment group would be public-two year institutions in Tennessee.
+
+Aside from enrollment, other outcomes to measure could include retention rates after the first year, graduation rates, time to degree completion, debt levels, salary outcomes, and employment outcomes.
+
+To perform this study I would need data on enrollment and graduation data while participants are in school, employment and salary data a number of years after participants have graduated, financial aid data, and demographic data on participants to control for confounding factors such as income level, ethnicity, and age range.
+
+Some potential data sources include:
+
+- the IPEDS data used in this data task, from which we could pull data on a neighboring state for the alternative DiD model. It would also include enrollment and graduation numbers.
+- the National Student Clearinghouse provides data on retention and degree completion rates.
+- state unemployment records would provide data on unemployment rates.
+- financial aid offices could provide data on how much aid is distributed, and how much of it is grant and loan.
+- the Census could provide demographic data like income and ethnicity.
+
+
